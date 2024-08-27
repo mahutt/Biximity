@@ -2,6 +2,26 @@
 // These must be at the very top of the file. Do not edit.
 // icon-color: deep-purple; icon-glyph: magic;
 
+let language = "english";
+if (
+    args &&
+    args.widgetParameter &&
+    args.widgetParameter.toLowerCase().startsWith("fr")
+) {
+    language = "french";
+}
+
+const text = {
+    english: {
+        seeMore: "See more",
+        updatedAt: "Updated at",
+    },
+    french: {
+        seeMore: "Voir plus",
+        updatedAt: "Mis à jour à",
+    },
+};
+
 const STYLE = {
     bodyPadding: 8,
     stationPadding: 4,
@@ -121,7 +141,7 @@ async function createWidget(stations) {
     let linkStack = footerStack.addStack();
     linkStack.centerAlignContent();
     linkStack.url = "https://secure.bixi.com/map";
-    let linkElement = linkStack.addText("See more");
+    let linkElement = linkStack.addText(text[language].seeMore);
     linkElement.font = Font.mediumSystemFont(13);
     linkElement.textColor = Color.blue();
     linkStack.addSpacer(3);
@@ -131,7 +151,7 @@ async function createWidget(stations) {
     footerStack.addSpacer();
     let timestampStack = footerStack.addStack();
     let timestampElement = timestampStack.addText(
-        `Updated at ${getCurrentTime()}`
+        `${text[language].updatedAt} ${getCurrentTime()}`
     );
     timestampElement.font = Font.mediumSystemFont(13);
     timestampElement.textColor = Color.white();
@@ -146,16 +166,13 @@ async function bixiAPI() {
     let location = await Location.current();
 
     for (let station of stations) {
-        //     sed = squared Euclidean distance
+        // Squared Euclidean Distance
         station.sed =
             Math.pow(station.lon - location.longitude, 2) +
             Math.pow(station.lat - location.latitude, 2);
     }
 
     let closestStations = stations.slice(0, 3);
-
-    console.log(stations.length);
-
     for (let i = 3; i < stations.length; i++) {
         const station = stations[i];
         for (let j = 0; j < closestStations.length; j++) {
@@ -255,7 +272,6 @@ function createDistanceString({ value, unit }) {
     let valueString = String(value);
 
     const int = String(Math.trunc(value));
-    console.log(int);
     if (int.length === 3) {
         valueString = int;
     } else if (int.length > 3) {
