@@ -25,7 +25,7 @@ const text = {
 const STYLE = {
     bodyPadding: 8,
     stationPadding: 4,
-    valueStackSize: new Size(20, 0),
+    valueStackSize: new Size(22, 0),
 };
 
 let stations = await bixiAPI();
@@ -59,21 +59,21 @@ async function createWidget(stations) {
     headerStack.addSpacer();
     headerStack.centerAlignContent();
     let bikeHeaderStack = headerStack.addStack();
-    bikeHeaderStack.size = new Size(20, 0);
+    bikeHeaderStack.size = STYLE.valueStackSize;
     let bikeSymbol = SFSymbol.named("bicycle");
     let image = bikeHeaderStack.addImage(bikeSymbol.image);
     image.imageSize = new Size(16, 16);
     image.tintColor = Color.green();
 
     let ebikeHeaderStack = headerStack.addStack();
-    ebikeHeaderStack.size = new Size(20, 0);
+    ebikeHeaderStack.size = STYLE.valueStackSize;
     let ebikeSymbol = SFSymbol.named("bolt.fill");
     image = ebikeHeaderStack.addImage(ebikeSymbol.image);
     image.imageSize = new Size(16, 16);
     image.tintColor = Color.blue();
 
     let dockStack = headerStack.addStack();
-    dockStack.size = new Size(20, 0);
+    dockStack.size = STYLE.valueStackSize;
     let dockSymbol = SFSymbol.named("equal.circle");
     image = dockStack.addImage(dockSymbol.image);
     image.imageSize = new Size(16, 16);
