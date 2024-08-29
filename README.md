@@ -1,6 +1,11 @@
 Biximity is a BIXI proximity widget for iOS - at a glance, you can view the street names and statuses of the nearest BIXI stations.
+
+<img src="https://github.com/user-attachments/assets/80eab5da-439b-4fb5-922b-8266a0907642" alt="biximity" width="400"/>
+
 > ⚠️ **Biximity is not yet available for Android**
+
 ## Installation
+
 1. Download the [Scriptable](https://scriptable.app/) app on your iPhone.
 2. Open the Scriptable app and tap the plus icon in the upper right corner.
 3. Tap the name of the new, untitled script to rename it to something of your choosing (such as `biximity`).
