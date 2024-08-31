@@ -4,9 +4,9 @@ Biximity is a BIXI proximity widget for iOS - at a glance, you can view the stre
 
 > ⚠️ **Biximity is not yet available for Android**
 
-## Installation
+## Installation (iOS)
 
-1. Download the [Scriptable](https://scriptable.app/) app on your iPhone.
+1. Download the [Scriptable](https://scriptable.app/) app from the App Store.
 2. Open the Scriptable app and tap the plus icon in the upper right corner.
 3. Tap the name of the new, untitled script to rename it to something of your choosing (such as `biximity`).
 4. Copy the contents of `ios/biximity.js` and paste it into your new Scriptable script.
