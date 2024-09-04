@@ -13,11 +13,11 @@ if (
 
 const text = {
     english: {
-        seeMore: "See more",
+        disclaimer: "Could not fetch location",
         updatedAt: "Updated at",
     },
     french: {
-        seeMore: "Voir plus",
+        disclaimer: "Échec de localisation",
         updatedAt: "Mis à jour à",
     },
 };
@@ -27,6 +27,8 @@ const STYLE = {
     stationPadding: 4,
     valueStackSize: new Size(22, 0),
 };
+
+let showDisclaimer = false;
 
 let stations = await bixiAPI();
 
@@ -136,18 +138,23 @@ async function createWidget(stations) {
 
     widget.addSpacer(STYLE.bodyPadding);
 
-    let linkSymbol = SFSymbol.named("arrow.up.forward");
     let footerStack = widget.addStack();
-    let linkStack = footerStack.addStack();
-    linkStack.centerAlignContent();
-    linkStack.url = "https://secure.bixi.com/map";
-    let linkElement = linkStack.addText(text[language].seeMore);
-    linkElement.font = Font.mediumSystemFont(13);
-    linkElement.textColor = Color.blue();
-    linkStack.addSpacer(3);
-    let linkSymbolElement = linkStack.addImage(linkSymbol.image);
-    linkSymbolElement.imageSize = new Size(11, 11);
-    linkSymbolElement.tintColor = Color.blue();
+
+    if (showDisclaimer) {
+        let disclaimerStack = footerStack.addStack();
+        disclaimerStack.centerAlignContent();
+        let infoSymbol = SFSymbol.named("info.circle");
+        let linkSymbolElement = disclaimerStack.addImage(infoSymbol.image);
+        linkSymbolElement.imageSize = new Size(11, 11);
+        linkSymbolElement.tintColor = Color.blue();
+        disclaimerStack.addSpacer(3);
+        let disclaimerElement = disclaimerStack.addText(
+            text[language].disclaimer
+        );
+        disclaimerElement.font = Font.mediumSystemFont(13);
+        disclaimerElement.textColor = Color.blue();
+    }
+
     footerStack.addSpacer();
     let timestampStack = footerStack.addStack();
     let timestampElement = timestampStack.addText(
@@ -163,7 +170,11 @@ async function createWidget(stations) {
 async function bixiAPI() {
     let stations = await loadStations();
 
-    let location = await Location.current();
+    let location = await getCoordinates();
+
+    if (!location) {
+        throw "Could not get coordinates";
+    }
 
     for (let station of stations) {
         // Squared Euclidean Distance
@@ -311,4 +322,40 @@ function getCurrentTime() {
     const minutes = String(now.getMinutes()).padStart(2, "0");
 
     return `${hours}:${minutes}`;
+}
+
+async function getCoordinates() {
+    try {
+        const location = await Location.current();
+        const coords = {
+            latitude: location.latitude,
+            longitude: location.longitude,
+        };
+
+        saveCoordinates(coords);
+
+        return coords;
+    } catch (error) {
+        console.log("Error fetching location: " + error);
+        showDisclaimer = true;
+        return getSavedCoordinates();
+    }
+}
+
+function saveCoordinates(coords) {
+    const fm = FileManager.local();
+    const path = fm.joinPath(fm.documentsDirectory(), "lastCoordinates.json");
+    fm.writeString(path, JSON.stringify(coords));
+}
+
+function getSavedCoordinates() {
+    const fm = FileManager.local();
+    const path = fm.joinPath(fm.documentsDirectory(), "lastCoordinates.json");
+
+    if (fm.fileExists(path)) {
+        const savedCoordsString = fm.readString(path);
+        return JSON.parse(savedCoordsString);
+    } else {
+        return null;
+    }
 }
