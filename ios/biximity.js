@@ -13,11 +13,11 @@ if (
 
 const text = {
     english: {
-        disclaimer: "Could not fetch location",
+        disclaimer: null,
         updatedAt: "Updated at",
     },
     french: {
-        disclaimer: "Échec de localisation",
+        disclaimer: null,
         updatedAt: "Mis à jour à",
     },
 };
@@ -28,9 +28,18 @@ const STYLE = {
     valueStackSize: new Size(22, 0),
 };
 
-let showDisclaimer = false;
-
-let stations = await bixiAPI();
+let stations;
+try {
+    stations = await bixiAPI();
+    saveStations(stations);
+} catch (e) {
+    stations = getSavedStations();
+    if (stations === null) {
+        throw new Error("Could not fetch stations");
+    }
+    text.english.disclaimer = "No internet connection";
+    text.french.disclaimer = "Pas de connexion internet";
+}
 
 const globalFont = new Font("normal", 16);
 
@@ -43,8 +52,6 @@ if (config.runsInWidget) {
 Script.complete();
 
 async function createWidget(stations) {
-    let appIcon = await loadAppIcon();
-
     let widget = new ListWidget();
 
     let gradient = new LinearGradient();
@@ -54,6 +61,7 @@ async function createWidget(stations) {
 
     let headerStack = widget.addStack();
 
+    let appIcon = await loadAppIcon();
     let appIconElement = headerStack.addImage(appIcon);
     appIconElement.imageSize = new Size(33, 10);
     appIconElement.cornerRadius = 4;
@@ -140,7 +148,7 @@ async function createWidget(stations) {
 
     let footerStack = widget.addStack();
 
-    if (showDisclaimer) {
+    if (text[language].disclaimer !== null) {
         let disclaimerStack = footerStack.addStack();
         disclaimerStack.centerAlignContent();
         let infoSymbol = SFSymbol.named("info.circle");
@@ -228,6 +236,17 @@ async function bixiAPI() {
         }
     }
 
+    // Trim station objects
+    closestStations = closestStations.map((station) => {
+        return {
+            name: station.name,
+            num_bikes_available: station.num_bikes_available,
+            num_ebikes_available: station.num_ebikes_available,
+            num_docks_available: station.num_docks_available,
+            distance: station.distance,
+        };
+    });
+
     return closestStations;
 }
 
@@ -244,10 +263,14 @@ async function loadStationStatuses() {
 }
 
 async function loadAppIcon() {
+    try {
     let url =
         "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bixi_logo.svg/2560px-Bixi_logo.svg.png";
     let req = new Request(url);
-    return req.loadImage();
+        return await req.loadImage();
+    } catch {
+        return SFSymbol.named("wifi.slash").image;
+    }
 }
 
 function decodeText(encodedText) {
@@ -337,7 +360,8 @@ async function getCoordinates() {
         return coords;
     } catch (error) {
         console.log("Error fetching location: " + error);
-        showDisclaimer = true;
+        text.english.disclaimer = "Could not fetch location";
+        text.french.disclaimer = "Échec de localisation";
         return getSavedCoordinates();
     }
 }
@@ -355,6 +379,24 @@ function getSavedCoordinates() {
     if (fm.fileExists(path)) {
         const savedCoordsString = fm.readString(path);
         return JSON.parse(savedCoordsString);
+    } else {
+        return null;
+    }
+}
+
+function saveStations(stations) {
+    const fm = FileManager.local();
+    const path = fm.joinPath(fm.documentsDirectory(), "lastStations.json");
+    fm.writeString(path, JSON.stringify(stations));
+}
+
+function getSavedStations() {
+    const fm = FileManager.local();
+    const path = fm.joinPath(fm.documentsDirectory(), "lastStations.json");
+
+    if (fm.fileExists(path)) {
+        const savedStationsString = fm.readString(path);
+        return JSON.parse(savedStationsString);
     } else {
         return null;
     }
