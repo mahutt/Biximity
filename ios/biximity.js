@@ -61,10 +61,17 @@ async function createWidget(stations) {
 
     let headerStack = widget.addStack();
 
-    let appIcon = await loadAppIcon();
-    let appIconElement = headerStack.addImage(appIcon);
-    appIconElement.imageSize = new Size(33, 10);
-    appIconElement.cornerRadius = 4;
+    try {
+        let appIcon = await loadAppIcon();
+        let appIconElement = headerStack.addImage(appIcon);
+        appIconElement.imageSize = new Size(33, 10);
+        appIconElement.cornerRadius = 4;
+    } catch {
+        let appIcon = SFSymbol.named("wifi.slash").image;
+        let appIconElement = headerStack.addImage(appIcon);
+        appIconElement.imageSize = new Size(16, 16);
+        appIconElement.tintColor = Color.red();
+    }
 
     headerStack.addSpacer();
     headerStack.centerAlignContent();
@@ -263,14 +270,10 @@ async function loadStationStatuses() {
 }
 
 async function loadAppIcon() {
-    try {
-        let url =
-            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bixi_logo.svg/2560px-Bixi_logo.svg.png";
-        let req = new Request(url);
-        return await req.loadImage();
-    } catch {
-        return SFSymbol.named("wifi.slash").image;
-    }
+    let url =
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bixi_logo.svg/2560px-Bixi_logo.svg.png";
+    let req = new Request(url);
+    return await req.loadImage();
 }
 
 function decodeText(encodedText) {
