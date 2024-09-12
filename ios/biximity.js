@@ -264,9 +264,9 @@ async function loadStationStatuses() {
 
 async function loadAppIcon() {
     try {
-    let url =
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bixi_logo.svg/2560px-Bixi_logo.svg.png";
-    let req = new Request(url);
+        let url =
+            "https://upload.wikimedia.org/wikipedia/commons/thumb/5/53/Bixi_logo.svg/2560px-Bixi_logo.svg.png";
+        let req = new Request(url);
         return await req.loadImage();
     } catch {
         return SFSymbol.named("wifi.slash").image;
